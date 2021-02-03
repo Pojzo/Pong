@@ -1,3 +1,3 @@
 cd Scripts
-activate
+start activate.bat
 cd ../files
