@@ -8,8 +8,8 @@ class Ball:
     def __init__(self, WIDTH, HEIGHT, r = 20, color = 'red'):
         self.x = WIDTH // 2# random.randint(0 + r * 3, WIDTH - r)
         self.y = HEIGHT // 2# random.randint(0 + r, HEIGHT - r)
-        self.vel_x = -0.3 # random.randint(-1, 1) 
-        self.vel_y = 0.3 # random.randint(1)
+        self.vel_x = -2 # random.randint(-1, 1) 
+        self.vel_y = 2 # random.randint(1)
         self.r = r
         self.color = colors.get(color)
         
@@ -37,7 +37,7 @@ class PaddlePlayer:
         self.height = 70
         self.x = x
         self.y = HEIGHT // 2
-        self.vel = 1
+        self.vel = 3
         self.KEYUP = False
         self.direction = 0
         self.color = colors.get('green')
@@ -91,6 +91,8 @@ class Game:
     WIDTH = 640
     HEIGHT = 480
     OFFSET = 20
+    clock = pygame.time.Clock()
+    FPS = 30
     def __init__(self):
         self.paddle1 = PaddlePlayer(self.WIDTH, self.HEIGHT, self.OFFSET) # player
         self.paddle2 = PaddleEnemy(self.WIDTH, self.HEIGHT, self.WIDTH - 40) # bot
@@ -100,6 +102,7 @@ class Game:
         self.running = True
 
     def run(self):
+        self.clock.tick(self.FPS)
         if not self.running:
             return
 
@@ -133,14 +136,12 @@ class Game:
         self.paddle1.show(self.screen)
         self.paddle1.move(self.screen)
         
-
         self.paddle2.collision(self.b, self.screen)
         self.paddle2.move(self.screen, self.b)
         self.paddle2.show(self.screen)
     
         pygame.display.flip()
     
-
 game = Game()
 while game.running:
     game.run()
