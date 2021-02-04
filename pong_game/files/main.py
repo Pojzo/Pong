@@ -70,74 +70,81 @@ class PaddleEnemy(PaddlePlayer):
         if ball.x < screen.get_width() // 2 or ball.vel_x < 0:
             return
         center_y = self.y + self.height // 2 # center of the paddle
-        if center_y > b.y:
+        if center_y > ball.y:
             if not self.y < 0:
                 self.y -= self.vel
         else:
             if not self.y + self.height > screen.get_height():
                 self.y += self.vel
             
-    def collision(self, b, screen):
-        if b.vel_x < 0:
+    def collision(self, ball, screen):
+        if ball.vel_x < 0:
             return
-        if b.x + b.r >= self.x:
-            if b.y >= self.y and b.y <= self.y + self.height:
-                b.recently_collided = True
-                b.change_direction()
+        if ball.x + ball.r >= self.x:
+            if ball.y >= self.y and ball.y <= self.y + self.height:
+                ball.recently_collided = True
+                ball.change_direction()
             else:
-                b.reset(screen)
+                ball.reset(screen)
 
+class Game:
+    WIDTH = 640
+    HEIGHT = 480
+    OFFSET = 20
+    def __init__(self):
+        self.paddle1 = PaddlePlayer(self.WIDTH, self.HEIGHT, self.OFFSET) # player
+        self.paddle2 = PaddleEnemy(self.WIDTH, self.HEIGHT, self.WIDTH - 40) # bot
+        self.b = Ball(self.WIDTH, self.HEIGHT)
 
-WIDTH = 640
-HEIGHT = 480
-OFFSET = 20
-paddle1 = PaddlePlayer(WIDTH, HEIGHT, OFFSET) # player
-paddle2 = PaddleEnemy(WIDTH, HEIGHT, WIDTH - 40) # bot
+        self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        self.running = True
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    def run(self):
+        if not self.running:
+            return
 
-b = Ball(WIDTH, HEIGHT)
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                self.running = 0
+            elif event.type == pygame.KEYDOWN:
+                print(event.key)
+                if event.key == pygame.K_UP:
+                    self.paddle1.KEYUP = True
+                    self.paddle1.direction = -1
 
-running = True
+                elif event.key == pygame.K_DOWN:
+                    self.paddle1.KEYUP = True
+                    self.paddle1.direction = 1
 
-while running:
-    if b.vel_x == 0:
-        continue
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            running = 0
-        elif event.type == pygame.KEYDOWN:
-            print(event.key)
-            if event.key == pygame.K_UP:
-                paddle1.KEYUP = True
-                paddle1.direction = -1
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    self.paddle1.KEYUP = False
+                    self.paddle1.direction = 0
 
-            elif event.key == pygame.K_DOWN:
-                paddle1.KEYUP = True
-                paddle1.direction = 1
+        self.show()
+                
+    def show(self):
+        self.screen.fill((120, 120, 120))
 
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                paddle1.KEYUP = False
-                paddle1.direction = 0
-            
+        self.b.show(self.screen)
+        self.b.move(self.screen)
 
-    screen.fill((120, 120, 120))
+        self.paddle1.collision(self.b,self. screen)
+        self.paddle1.show(self.screen)
+        self.paddle1.move(self.screen)
+        
 
-    b.show(screen)
-    b.move(screen)
-
-    paddle1.collision(b, screen)
-    paddle1.show(screen)
-    paddle1.move(screen)
+        self.paddle2.collision(self.b, self.screen)
+        self.paddle2.move(self.screen, self.b)
+        self.paddle2.show(self.screen)
+    
+        pygame.display.flip()
     
 
-    paddle2.collision(b, screen)
-    paddle2.move(screen, b)
-    paddle2.show(screen)
- 
-    pygame.display.flip()
-    
+game = Game()
+while game.running:
+    game.run()
+
 pygame.quit()
 
   
