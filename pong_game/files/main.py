@@ -5,23 +5,24 @@ from colors import colors
 
 pygame.init()
 pygame.font.init()
+
+
 class Ball:
-    def __init__(self, WIDTH, HEIGHT, r = 20, color = 'red'):
-        self.x = WIDTH // 2# random.randint(0 + r * 3, WIDTH - r)
-        self.y = HEIGHT // 2# random.randint(0 + r, HEIGHT - r)
-        self.vel_x = -2 # random.randint(-1, 1) 
-        self.vel_y = 2 # random.randint(1)
+    def __init__(self, WIDTH, HEIGHT, r=20, color='red'):
+        self.x = WIDTH // 2  # random.randint(0 + r * 3, WIDTH - r)
+        self.y = HEIGHT // 2  # random.randint(0 + r, HEIGHT - r)
+        self.vel_x = -2  # random.randint(-1, 1)
+        self.vel_y = 2  # random.randint(1)
         self.r = r
         self.color = colors.get(color)
-        
 
     def show(self, screen):
-         pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
 
-    def move(self, screen): 
+    def move(self, screen):
         self.x += self.vel_x
         self.y += self.vel_y
-        
+
         if (self.y + self.r) >= screen.get_height() or (self.y - self.r) <= 0:
             self.vel_y *= -1
 
@@ -30,6 +31,7 @@ class Ball:
 
     def reset(self, screen):
         self.x = screen.get_width() // 2
+
 
 class PaddlePlayer:
     def __init__(self, WIDTH, HEIGHT, x):
@@ -44,43 +46,46 @@ class PaddlePlayer:
         self.score = 0
 
     def show(self, screen):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(screen, self.color,
+                         (self.x, self.y, self.width, self.height))
 
     def move(self, screen):
         if self.y >= 0 and self.direction == -1:
             self.y += self.vel * self.direction
-        
+
         elif self.y + self.height <= screen.get_height() and self.direction == 1:
             self.y += self.vel * self.direction
-    
+
     def add_score(self):
         self.score += 1
 
-    def collision(self, b, screen):  
+    def collision(self, b, screen):
         if b.vel_x > 0:
             return
 
-        if b.x - b.r <= self.x + self.width: 
-            if b.y + b.r >= self.y and b.y - b.r <= self.y + self.height: 
-                b.change_direction() 
+        if b.x - b.r <= self.x + self.width:
+            if b.y + b.r >= self.y and b.y - b.r <= self.y + self.height:
+                b.change_direction()
             else:
                 self.add_score()
                 b.reset(screen)
+
+
 class PaddleEnemy(PaddlePlayer):
     def __init__(self, WIDTH, HEIGHT, x):
         super().__init__(WIDTH, HEIGHT, x)
-    
+
     def move(self, screen, ball):
         if ball.x < screen.get_width() // 2 or ball.vel_x < 0:
             return
-        center_y = self.y + self.height // 2 # center of the paddle
+        center_y = self.y + self.height // 2  # center of the paddle
         if center_y > ball.y:
             if not self.y < 0:
                 self.y -= self.vel
         else:
             if not self.y + self.height > screen.get_height():
                 self.y += self.vel
-            
+
     def collision(self, ball, screen):
         if ball.vel_x < 0:
             return
@@ -91,15 +96,19 @@ class PaddleEnemy(PaddlePlayer):
                 self.add_score()
                 ball.reset(screen)
 
+
 class Game:
     WIDTH = 640
     HEIGHT = 480
     OFFSET = 20
     clock = pygame.time.Clock()
     FPS = 200
+
     def __init__(self):
-        self.paddle1 = PaddlePlayer(self.WIDTH, self.HEIGHT, self.OFFSET) # player
-        self.paddle2 = PaddleEnemy(self.WIDTH, self.HEIGHT, self.WIDTH - 40) # bot
+        self.paddle1 = PaddlePlayer(
+            self.WIDTH, self.HEIGHT, self.OFFSET)  # player
+        self.paddle2 = PaddleEnemy(
+            self.WIDTH, self.HEIGHT, self.WIDTH - 40)  # bot
         self.b = Ball(self.WIDTH, self.HEIGHT)
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
@@ -123,16 +132,15 @@ class Game:
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     self.paddle1.KEYUP = False
                     self.paddle1.direction = 0
-    
+
     def move_objects(self):
-        self.b.move(self.screen) 
+        self.b.move(self.screen)
 
         self.paddle1.move(self.screen)
-        self.paddle1.collision(self.b,self. screen)
+        self.paddle1.collision(self.b, self. screen)
 
         self.paddle2.move(self.screen, self.b)
         self.paddle2.collision(self.b, self.screen)
-        
 
     def run(self):
         if not self.running:
@@ -143,17 +151,19 @@ class Game:
         self.move_objects()
         self.show()
 
-    def show_background(self, width = 10, height = 20, gap = 10):
+    def show_background(self, width=10, height=20, gap=10):
+
         self.screen.fill(colors.get('gray'))
         lines = self.screen.get_height() // height
         color = colors.get('white')
         y = gap // 2
         for i in range(lines):
-            pygame.draw.rect(self.screen, color, (self.screen.get_width()//2 - width, y, width , height))
+            pygame.draw.rect(
+                self.screen, color, (self.screen.get_width()//2 - width, y, width, height))
             y += height + gap
 
     def show_objects(self):
-        self.b.show(self.screen)  
+        self.b.show(self.screen)
         self.paddle1.show(self.screen)
         self.paddle2.show(self.screen)
 
@@ -170,11 +180,10 @@ class Game:
         self.show_objects()
         self.draw_score()
         pygame.display.flip()
-    
+
+
 game = Game()
 while game.running:
     game.run()
 
 pygame.quit()
-
-  
