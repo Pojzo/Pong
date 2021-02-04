@@ -4,6 +4,7 @@ import random
 from colors import colors
 
 pygame.init()
+pygame.font.init()
 class Ball:
     def __init__(self, WIDTH, HEIGHT, r = 20, color = 'red'):
         self.x = WIDTH // 2# random.randint(0 + r * 3, WIDTH - r)
@@ -15,8 +16,7 @@ class Ball:
         
 
     def show(self, screen):
-         pygame.draw.circle(screen, self.color
-         , (self.x, self.y), self.r)
+         pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
 
     def move(self, screen): 
         self.x += self.vel_x
@@ -99,6 +99,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.running = True
+        self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -151,9 +152,14 @@ class Game:
         self.paddle1.show(self.screen)
         self.paddle2.show(self.screen)
 
+    def draw_score(self):
+        textsurface = self.font.render('Hello', False, (0, 0, 0))
+        self.screen.blit(textsurface, (0, 0))
+
     def show(self):
         self.show_background()
         self.show_objects()
+        self.draw_score()
         pygame.display.flip()
     
 game = Game()
