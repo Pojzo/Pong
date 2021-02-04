@@ -11,7 +11,7 @@ class Dog(Pet):
         super().__init__(name)
 
 
-pet = Pet("Albert")
+pet = Pet("Hubert")
 dog = Dog("Štefan")
 
 pet.print_name()

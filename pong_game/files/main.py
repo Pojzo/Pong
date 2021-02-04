@@ -60,7 +60,6 @@ class PaddlePlayer:
             if b.y + b.r >= self.y and b.y - b.r <= self.y + self.height: 
                 b.change_direction() 
             else:
-                print(b.vel_x, b.y, self.y + self.height)
                 b.reset(screen)
 class PaddleEnemy(PaddlePlayer):
     def __init__(self, WIDTH, HEIGHT, x):
@@ -92,7 +91,7 @@ class Game:
     HEIGHT = 480
     OFFSET = 20
     clock = pygame.time.Clock()
-    FPS = 30
+    FPS = 200
     def __init__(self):
         self.paddle1 = PaddlePlayer(self.WIDTH, self.HEIGHT, self.OFFSET) # player
         self.paddle2 = PaddleEnemy(self.WIDTH, self.HEIGHT, self.WIDTH - 40) # bot
@@ -101,16 +100,11 @@ class Game:
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.running = True
 
-    def run(self):
-        self.clock.tick(self.FPS)
-        if not self.running:
-            return
-
+    def handle_events(self):
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.running = 0
             elif event.type == pygame.KEYDOWN:
-                print(event.key)
                 if event.key == pygame.K_UP:
                     self.paddle1.KEYUP = True
                     self.paddle1.direction = -1
@@ -123,23 +117,43 @@ class Game:
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     self.paddle1.KEYUP = False
                     self.paddle1.direction = 0
-
-        self.show()
-                
-    def show(self):
-        self.screen.fill((120, 120, 120))
-
-        self.b.show(self.screen)
-        self.b.move(self.screen)
-
-        self.paddle1.collision(self.b,self. screen)
-        self.paddle1.show(self.screen)
-        self.paddle1.move(self.screen)
-        
-        self.paddle2.collision(self.b, self.screen)
-        self.paddle2.move(self.screen, self.b)
-        self.paddle2.show(self.screen)
     
+    def move_objects(self):
+        self.b.move(self.screen) 
+
+        self.paddle1.move(self.screen)
+        self.paddle1.collision(self.b,self. screen)
+
+        self.paddle2.move(self.screen, self.b)
+        self.paddle2.collision(self.b, self.screen)
+        
+
+    def run(self):
+        if not self.running:
+            return
+
+        self.clock.tick(self.FPS)
+        self.handle_events()
+        self.move_objects()
+        self.show()
+
+    def show_background(self, width = 10, height = 20, gap = 10):
+        self.screen.fill(colors.get('gray'))
+        lines = self.screen.get_height() // height
+        color = colors.get('white')
+        y = gap // 2
+        for i in range(lines):
+            pygame.draw.rect(self.screen, color, (self.screen.get_width()//2 - width, y,width , height))
+            y += height + gap
+
+    def show_objects(self):
+        self.b.show(self.screen)  
+        self.paddle1.show(self.screen)
+        self.paddle2.show(self.screen)
+
+    def show(self):
+        self.show_background()
+        self.show_objects()
         pygame.display.flip()
     
 game = Game()
