@@ -41,6 +41,7 @@ class PaddlePlayer:
         self.KEYUP = False
         self.direction = 0
         self.color = colors.get('green')
+        self.score = 0
 
     def show(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
@@ -51,7 +52,10 @@ class PaddlePlayer:
         
         elif self.y + self.height <= screen.get_height() and self.direction == 1:
             self.y += self.vel * self.direction
-            
+    
+    def add_score(self):
+        self.score += 1
+
     def collision(self, b, screen):  
         if b.vel_x > 0:
             return
@@ -60,11 +64,12 @@ class PaddlePlayer:
             if b.y + b.r >= self.y and b.y - b.r <= self.y + self.height: 
                 b.change_direction() 
             else:
+                self.add_score()
                 b.reset(screen)
 class PaddleEnemy(PaddlePlayer):
     def __init__(self, WIDTH, HEIGHT, x):
         super().__init__(WIDTH, HEIGHT, x)
-
+    
     def move(self, screen, ball):
         if ball.x < screen.get_width() // 2 or ball.vel_x < 0:
             return
@@ -81,9 +86,9 @@ class PaddleEnemy(PaddlePlayer):
             return
         if ball.x + ball.r >= self.x:
             if ball.y >= self.y and ball.y <= self.y + self.height:
-                ball.recently_collided = True
                 ball.change_direction()
             else:
+                self.add_score()
                 ball.reset(screen)
 
 class Game:
@@ -99,7 +104,7 @@ class Game:
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.running = True
-        self.font = pygame.font.SysFont('Comic Sans MS', 30)
+        self.font = pygame.font.SysFont('Arial', 30)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -144,7 +149,7 @@ class Game:
         color = colors.get('white')
         y = gap // 2
         for i in range(lines):
-            pygame.draw.rect(self.screen, color, (self.screen.get_width()//2 - width, y,width , height))
+            pygame.draw.rect(self.screen, color, (self.screen.get_width()//2 - width, y, width , height))
             y += height + gap
 
     def show_objects(self):
@@ -153,8 +158,12 @@ class Game:
         self.paddle2.show(self.screen)
 
     def draw_score(self):
-        textsurface = self.font.render('Hello', False, (0, 0, 0))
-        self.screen.blit(textsurface, (0, 0))
+        score1 = self.paddle2.score
+        score2 = self.paddle1.score
+        surface1 = self.font.render(str(score1), False, (0, 0, 0))
+        surface2 = self.font.render(str(score2), False, (0, 0, 0))
+        self.screen.blit(surface1, (self.screen.get_width() // 4, 0))
+        self.screen.blit(surface2, (self.screen.get_width() // 4 * 3 - 30, 0))
 
     def show(self):
         self.show_background()
