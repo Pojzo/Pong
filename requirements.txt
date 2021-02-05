@@ -1,0 +1,6 @@
+autopep8==1.5.5
+pip==19.2.3
+pycodestyle==2.6.0
+pygame==2.0.1
+setuptools==41.2.0
+toml==0.10.2
