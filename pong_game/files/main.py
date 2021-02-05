@@ -8,7 +8,7 @@ pygame.font.init()
 
 
 class Ball:
-    def __init__(self, WIDTH, HEIGHT, r=20, color='red'):
+    def __init__(self, WIDTH, HEIGHT, r=10, color='red'):
         self.x = WIDTH // 2  # random.randint(0 + r * 3, WIDTH - r)
         self.y = HEIGHT // 2  # random.randint(0 + r, HEIGHT - r)
         self.vel_x = -2  # random.randint(-1, 1)
@@ -26,7 +26,10 @@ class Ball:
         if (self.y + self.r) >= screen.get_height() or (self.y - self.r) <= 0:
             self.vel_y *= -1
 
-    def change_direction(self):
+    def map_range(self, value, start1, stop1, start2, stop2):
+       return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2
+
+    def collide(self, paddle_start, paddle_height):
         self.vel_x *= -1
 
     def reset(self, screen):
@@ -34,7 +37,7 @@ class Ball:
 
 
 class PaddlePlayer:
-    def __init__(self, WIDTH, HEIGHT, x):
+    def __init__(self, WIDTH, HEIGHT, x, color = 'black'):
         self.width = 20
         self.height = 70
         self.x = x
@@ -42,19 +45,31 @@ class PaddlePlayer:
         self.vel = 3
         self.KEYUP = False
         self.direction = 0
-        self.color = colors.get('green')
+        self.color = colors.get(color)
         self.score = 0
 
     def show(self, screen):
         pygame.draw.rect(screen, self.color,
                          (self.x, self.y, self.width, self.height))
 
-    def move(self, screen):
+    def move(self, screen, ball, autonomy = False):
+        if autonomy:
+            if ball.x > screen.get_width() // 2 or ball.vel_x > 0:
+                return
+            center_y = self.y + self.height // 2  # center of the paddle
+            if center_y > ball.y:
+                if not self.y < 0:
+                    self.y -= self.vel          
+            else:
+                if not self.y + self.height > screen.get_height():
+                    self.y += self.vel
+            return
         if self.y >= 0 and self.direction == -1:
             self.y += self.vel * self.direction
 
         elif self.y + self.height <= screen.get_height() and self.direction == 1:
             self.y += self.vel * self.direction
+        
 
     def add_score(self):
         self.score += 1
@@ -65,7 +80,7 @@ class PaddlePlayer:
 
         if b.x - b.r <= self.x + self.width:
             if b.y + b.r >= self.y and b.y - b.r <= self.y + self.height:
-                b.change_direction()
+                b.collide(self.y, self.height)
             else:
                 self.add_score()
                 b.reset(screen)
@@ -81,7 +96,7 @@ class PaddleEnemy(PaddlePlayer):
         center_y = self.y + self.height // 2  # center of the paddle
         if center_y > ball.y:
             if not self.y < 0:
-                self.y -= self.vel
+                self.y -= self.vel          
         else:
             if not self.y + self.height > screen.get_height():
                 self.y += self.vel
@@ -91,7 +106,7 @@ class PaddleEnemy(PaddlePlayer):
             return
         if ball.x + ball.r >= self.x:
             if ball.y >= self.y and ball.y <= self.y + self.height:
-                ball.change_direction()
+                ball.collide(self.y, self.height) # pass center of the paddle
             else:
                 self.add_score()
                 ball.reset(screen)
@@ -135,8 +150,8 @@ class Game:
 
     def move_objects(self):
         self.b.move(self.screen)
-
-        self.paddle1.move(self.screen)
+    
+        self.paddle1.move(self.screen, self.b, autonomy=True)
         self.paddle1.collision(self.b, self. screen)
 
         self.paddle2.move(self.screen, self.b)
