@@ -85,10 +85,14 @@ class PaddlePlayer:
                 self.add_score()
                 b.reset(screen)
 
-
 class PaddleEnemy(PaddlePlayer):
     def __init__(self, WIDTH, HEIGHT, x):
         super().__init__(WIDTH, HEIGHT, x)
+
+
+    def move_by_value(self, value, screen):
+        if not self.y < 0 and not self.y + self.height > screen.get_height():
+            self.vel.y += value
 
     def move(self, screen, ball):
         if ball.x < screen.get_width() // 2 or ball.vel_x < 0:
@@ -129,6 +133,7 @@ class Game:
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.running = True
         self.font = pygame.font.SysFont('Arial', 30)
+        self.local = False # 
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -154,7 +159,8 @@ class Game:
         self.paddle1.move(self.screen, self.b, autonomy=True)
         self.paddle1.collision(self.b, self. screen)
 
-        self.paddle2.move(self.screen, self.b)
+        if self.local:    
+            self.paddle2.move(self.screen, self.b)
         self.paddle2.collision(self.b, self.screen)
 
     def run(self):
@@ -196,9 +202,13 @@ class Game:
         self.draw_score()
         pygame.display.flip()
 
+    def receive_message(self, msg):
+        value = 0
+        self.paddle2.move_by_value(value, self.screen)
 
 game = Game()
 while game.running:
+    game.local = False
     game.run()
 
 pygame.quit()

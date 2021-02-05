@@ -11,6 +11,15 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # family, type
 server.bind(ADDR)
 
+def send(msg):
+    message = msg.encode(FORMAT)
+    msg_length = len(message)
+    send_length = str(msg_length).encode(FORMAT)
+    send_length += b' ' * (HEADER - len(send_length))
+    server.send(send_length)
+    server.send(message)
+    received_message = server.recv(2048).decode(FORMAT)
+    print(f'{received_message}')
 
 def handle_client(conn, addr):
     print(f'[NEW CONNECTION] {addr} connected.')
@@ -31,7 +40,7 @@ def handle_client(conn, addr):
 
     print(f'Disconnect from [{addr}]')
     conn.close()
- 
+
 def start():
     server.listen()
     print(f'[LISTENING] Server is listening on {SERVER}')
