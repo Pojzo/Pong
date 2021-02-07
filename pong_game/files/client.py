@@ -3,6 +3,7 @@ import game as pong_game
 import pygame
 import pickle
 from datetime import datetime
+import threading
 
 
 HEADER = 16
@@ -42,6 +43,10 @@ def send(conn, message):
     conn.send(header_len)
     conn.send(pickled_message)
 
+def run_game():
+    global game_object
+    game_object.run()
+
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
@@ -57,9 +62,10 @@ cur_time = datetime.now()
 send(client, cur_time)
 game_object = pong_game.Game()
 game_object.local = False
+thread = threading.Thread(target=run_game)
+thread.start()
 
 while connected:
-    game_object.run()    
     try:
         message = receive(client)
         if not message is None:
@@ -70,7 +76,7 @@ while connected:
                 #print(f'[INCOMING MESSAGE] {message}')
                 game_object.paddle1.y = message['player_y']
                 game_object.paddle2.y = message['enemy_y']
-                game_object.ball.x, game_object.ball_y = message['ball_pos']
+                game_object.b.x, game_object.ball_y = message['ball_pos']
                 cur_time = datetime.now()
                 send(client, cur_time)
     except ConnectionResetError:
