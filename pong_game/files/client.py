@@ -77,7 +77,7 @@ while connected:
                 #print(f'[INCOMING MESSAGE] {message}')
                 game_object.paddle1.y = message['player_y']
                 game_object.paddle2.y = message['enemy_y']
-                game_object.b.x, game_object.ball_y = message['ball_pos']
+                game_object.b.x, game_object.b.y = message['ball_pos']
                 cur_time = datetime.now()
                 send(client, cur_time)
     except ConnectionResetError:

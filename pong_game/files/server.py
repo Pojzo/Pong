@@ -45,7 +45,8 @@ def send(conn, message):
     conn.send(header_len)
     conn.send(pickled_message)
 
-game_object = None
+
+
 def handle_client(conn, addr):
     send(conn, INITIATION_MESSAGE)
     while not initiate(conn):
@@ -59,7 +60,7 @@ def handle_client(conn, addr):
 
     connected = True
     while connected:
-
+        print(game_object.paddle1.y)
         game_info = {
             'player_y' : game_object.paddle1.y,
             'enemy_y' : game_object.paddle2.y,
@@ -76,14 +77,12 @@ def handle_client(conn, addr):
 
     print('[CONNECTION UPDATE] Client has disconnected from the server')
     conn.close()
-
+    
+game_object = None
 count = 0
 def run_game():
+    global game_object
     while game_object.running:
-        global count
-        print(count)
-        count += 1
-        global game_object
         game_object.run()
 
 pygame.quit()

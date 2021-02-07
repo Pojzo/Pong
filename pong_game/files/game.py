@@ -46,11 +46,11 @@ class Game:
 
     def move_objects(self):
         self.b.move(self.screen)
-
+        autonomy = True
         self.paddle1.move(self.screen, self.b, autonomy=True)
         self.paddle1.collision(self.b, self. screen)
 
-        if self.local:
+        if self.local or autonomy:
             self.paddle2.move(self.screen, self.b)
         self.paddle2.collision(self.b, self.screen)
 
