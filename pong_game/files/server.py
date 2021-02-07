@@ -45,33 +45,34 @@ def send(conn, message):
     conn.send(header_len)
     conn.send(pickled_message)
 
-
 def handle_client(conn, addr):
     send(conn, INITIATION_MESSAGE)
     while not initiate(conn):
         pass
 
     print('[CONNECTION UPDATE] Received initiation message from the client')
+    game_object = pong_game.Game()
     connected = True
     while connected:
+        game_object.run()
+        game_object.move_enemy(0.2)
+        game_info = {
+            'player_y' : game_object.paddle1.y,
+            'enemy_y' : game_object.paddle2.y,
+            'ball_pos' : (game_object.b.x, game_object.b.y)
+        }
         message = receive(conn)
         if not message is None:
             if message == DISCONNECT_MESSAGE:
                 connected = False
             else:
-                print(f'[INCOMING MESSAGE] {message}')
+                #print(f'[INCOMING MESSAGE] {message}')
                 cur_time = datetime.now()
-                send(conn, cur_time)
+                send(conn, game_info)
 
     print('[CONNECTION UPDATE] Client has disconnected from the server')
     conn.close()
 
-
-def run_game():
-    game = pong_game.Game()
-    while game.running:
-        game.local = True
-        game.run()
 
 
 pygame.quit()
@@ -80,8 +81,6 @@ pygame.quit()
 def start():
     server.listen()
     print(f'[LISTENING] Server is listening on {SERVER}')
-    #game_thread = threading.Thread(target=run_game)
-    #game_thread.start()
     while True:
         conn, addr = server.accept()
         thread = threading.Thread(target=handle_client, args=(conn, addr))

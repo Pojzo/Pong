@@ -5,7 +5,6 @@ from colors import colors
 from objects import PaddlePlayer, PaddleEnemy, Ball
 
 
-
 class Game:
     WIDTH = 640
     HEIGHT = 480
@@ -94,9 +93,8 @@ class Game:
         self.draw_score()
         pygame.display.flip()
 
-    def receive_message(self, msg):
-        value = 0
+    def move_player(self, value):
+        self.paddle1.move_by_value(value, self.screen)
+
+    def move_enemy(self, value):
         self.paddle2.move_by_value(value, self.screen)
-
-
-

@@ -65,6 +65,10 @@ class PaddlePlayer:
         elif self.y + self.height <= screen.get_height() and self.direction == 1:
             self.y += self.vel * self.direction
 
+    def move_by_value(self, value, screen):
+        if not self.y < 0 and not self.y + self.height > screen.get_height():
+            self.y += value
+
     def add_score(self):
         self.score += 1
 
@@ -83,10 +87,6 @@ class PaddlePlayer:
 class PaddleEnemy(PaddlePlayer):
     def __init__(self, WIDTH, HEIGHT, x):
         super().__init__(WIDTH, HEIGHT, x)
-
-    def move_by_value(self, value, screen):
-        if not self.y < 0 and not self.y + self.height > screen.get_height():
-            self.vel.y += value
 
     def move(self, screen, ball):
         if ball.x < screen.get_width() // 2 or ball.vel_x < 0:

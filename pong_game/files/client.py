@@ -9,7 +9,7 @@ HEADER = 16
 PORT = 5050
 FORMAT = 'UTF-8'
 DISCONNECT_MESSAGE = '!DISCONNECT'
-SERVER = '192.168.100.15'
+SERVER = '192.168.100.19'
 ADDR = (SERVER, PORT)
 INITIATION_MESSAGE = '!INITIATE'
 
@@ -55,15 +55,22 @@ send(client, INITIATION_MESSAGE)
 connected = True
 cur_time = datetime.now()
 send(client, cur_time)
-while connected:    
-    try
+game_object = pong_game.Game()
+game_object.local = False
+
+while connected:
+    game_object.run()    
+    try:
         message = receive(client)
         if not message is None:
             if message == DISCONNECT_MESSAGE:
                 connected = False
                 break
             else:
-                print(f'[INCOMING MESSAGE] {message}')
+                #print(f'[INCOMING MESSAGE] {message}')
+                game_object.paddle1.y = message['player_y']
+                game_object.paddle2.y = message['enemy_y']
+                game_object.ball.x, game_object.ball_y = message['ball_pos']
                 cur_time = datetime.now()
                 send(client, cur_time)
     except ConnectionResetError:
