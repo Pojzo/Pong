@@ -53,19 +53,15 @@ def handle_client(conn, addr):
         pass
 
     print('[CONNECTION UPDATE] Received initiation message from the client')
-    global game_object
-    game_object = pong_game.Game()
-    game_thread = threading.Thread(target=run_game)
-    game_thread.start()
 
     connected = True
     while connected:
-        print(game_object.paddle1.y)
-        game_info = {
-            'player_y' : game_object.paddle1.y,
-            'enemy_y' : game_object.paddle2.y,
-            'ball_pos' : (game_object.b.x, game_object.b.y)
-        }
+        #game_info = game_object.get_info()
+        global game
+        game_info = game.get_info()
+
+        
+        #print(f'Sending {game_info}')
         message = receive(conn)
         if not message is None:
             if message == DISCONNECT_MESSAGE:
@@ -73,30 +69,42 @@ def handle_client(conn, addr):
             else:
                 #print(f'[INCOMING MESSAGE] {message}')
                 cur_time = datetime.now()
-                send(conn, game_info)
+                send(conn, cur_time)
 
     print('[CONNECTION UPDATE] Client has disconnected from the server')
     conn.close()
-    
-game_object = None
-count = 0
-def run_game():
-    global game_object
-    while game_object.running:
-        game_object.run()
 
-pygame.quit()
+game_object = None
+
+count = 0
+
 
 
 def start():
     server.listen()
     print(f'[LISTENING] Server is listening on {SERVER}')
-    while True:
+    not_accepted = True
+    conn, addr = None, None
+    while not_accepted:
         conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
-        thread.start()
-        print(f'[ACTIVE CONNECTIONS] {threading.activeCount() - 2}')
+        not_accepted = False
 
+    global game
+    game = pong_game.Game()
+    thread = threading.Thread(target=handle_client, args=(conn, addr))
+    thread.start()
+
+    print(f'[ACTIVE CONNECTIONS] {threading.activeCount() - 2}')
+    while game.running:
+        print(datetime.now())
+        game.run()
+    
+
+    
+game = None
 
 print('[STARTING] server is starting')
+
 start()
+
+run_game()

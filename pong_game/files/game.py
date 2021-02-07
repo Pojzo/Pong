@@ -28,7 +28,9 @@ class Game:
 
     def handle_events(self):
         for event in pygame.event.get():
+            print(event)
             if event.type == QUIT:
+                pygame.quit()
                 self.running = 0
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
@@ -43,6 +45,8 @@ class Game:
                 if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                     self.paddle1.KEYUP = False
                     self.paddle1.direction = 0
+
+        pygame.event.pump()
 
     def move_objects(self):
         self.b.move(self.screen)
@@ -98,3 +102,11 @@ class Game:
 
     def move_enemy(self, value):
         self.paddle2.move_by_value(value, self.screen)
+
+    def get_info(self):
+        game_info = {
+            'player_y' : self.paddle1.y,
+            'enemy_y' : self.paddle2.y,
+            'ball_pos' : (self.b.x, self.b.y)
+        }
+        return game_info

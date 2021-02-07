@@ -19,7 +19,6 @@ def receive(conn):
     message_len = conn.recv(HEADER)
     message_len = message_len.decode(FORMAT)
 
-
     if message_len:
         message = conn.recv(int(message_len))
         message = pickle.loads(message)
@@ -39,9 +38,10 @@ def send(conn, message):
     pickled_message = pickle.dumps(message)
     message_bytes = pickled_message
     header_len = str(len(message_bytes)).encode(FORMAT)
-    header_len += b' ' * (HEADER - len(header_len))#
+    header_len += b' ' * (HEADER - len(header_len))
     conn.send(header_len)
     conn.send(pickled_message)
+
 
 def run_game():
     while game_object.running:
@@ -75,10 +75,11 @@ while connected:
                 break
             else:
                 #print(f'[INCOMING MESSAGE] {message}')
-                game_object.paddle1.y = message['player_y']
-                game_object.paddle2.y = message['enemy_y']
-                game_object.b.x, game_object.b.y = message['ball_pos']
+                #game_object.paddle1.y = message['player_y']
+                #game_object.paddle2.y = message['enemy_y']
+                #game_object.b.x, game_object.b.y = message['ball_pos']
                 cur_time = datetime.now()
+                print(message)
                 send(client, cur_time)
     except ConnectionResetError:
         connected = False
