@@ -42,7 +42,7 @@ def send(conn, message):
     conn.send(header_len)
     conn.send(pickled_message)
 
-
+game_object = None
 def run_game():
     while game_object.running:
         global game_object
