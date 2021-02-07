@@ -45,6 +45,7 @@ def send(conn, message):
 def handle_connection(conn):
     connected = True
     while connected:
+        global game
         try:
             message = receive(client)
             if not message is None:
@@ -52,10 +53,10 @@ def handle_connection(conn):
                     connected = False
                     break
                 else:
-                    #print(f'[INCOMING MESSAGE] {message}')
-                    #game_object.paddle1.y = message['player_y']
-                    #game_object.paddle2.y = message['enemy_y']
-                    #game_object.b.x, game_object.b.y = message['ball_pos']
+                    print(f'[INCOMING MESSAGE] {message}')
+                    game.paddle1.y = message['player_y']
+                    game.paddle2.y = message['enemy_y']
+                    game.b.x, object.b.y = message['ball_pos']
                     cur_time = datetime.now()
                     print(message)
                     send(client, cur_time)
@@ -80,6 +81,7 @@ game.local = False
 thread = threading.Thread(target=handle_connection, args=(client,))
 thread.start()
 while game.running:
+    game.local = False
     game.run()
 
 
