@@ -44,8 +44,9 @@ def send(conn, message):
     conn.send(pickled_message)
 
 def run_game():
-    global game_object
-    game_object.run()
+    while game_object.running:
+        global game_object
+        game_object.run()
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
