@@ -42,12 +42,28 @@ def send(conn, message):
     conn.send(header_len)
     conn.send(pickled_message)
 
-game_object = None
-def run_game():
-    while game_object.running:
-        global game_object
-        game_object.run()
+def handle_connection(conn):
+    connected = True
+    while connected:
+        try:
+            message = receive(client)
+            if not message is None:
+                if message == DISCONNECT_MESSAGE:
+                    connected = False
+                    break
+                else:
+                    #print(f'[INCOMING MESSAGE] {message}')
+                    #game_object.paddle1.y = message['player_y']
+                    #game_object.paddle2.y = message['enemy_y']
+                    #game_object.b.x, game_object.b.y = message['ball_pos']
+                    cur_time = datetime.now()
+                    print(message)
+                    send(client, cur_time)
 
+        except ConnectionResetError:
+            connected = False
+
+    conn.close()
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
@@ -58,31 +74,14 @@ while not initiate(client):
 
 print('[CONNECTION UPDATE] Received initiation message')
 send(client, INITIATION_MESSAGE)
-connected = True
-cur_time = datetime.now()
-send(client, cur_time)
-game_object = pong_game.Game()
-game_object.local = False
-thread = threading.Thread(target=run_game)
-thread.start()
 
-while connected:
-    try:
-        message = receive(client)
-        if not message is None:
-            if message == DISCONNECT_MESSAGE:
-                connected = False
-                break
-            else:
-                #print(f'[INCOMING MESSAGE] {message}')
-                #game_object.paddle1.y = message['player_y']
-                #game_object.paddle2.y = message['enemy_y']
-                #game_object.b.x, game_object.b.y = message['ball_pos']
-                cur_time = datetime.now()
-                print(message)
-                send(client, cur_time)
-    except ConnectionResetError:
-        connected = False
+game = pong_game.Game()
+game.local = False
+thread = threading.Thread(target=handle_connection, args=(client,))
+thread.start()
+while game.running:
+    game.run()
+
 
 print('[CONNECTION UPDATE] Disconnecting from the server')
 
