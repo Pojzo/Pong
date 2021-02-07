@@ -82,7 +82,7 @@ thread = threading.Thread(target=handle_connection, args=(client,))
 thread.start()
 while game.running:
     game.local = False
-    game.run()
+    game.run(autonomy=False)
 
 
 print('[CONNECTION UPDATE] Disconnecting from the server')

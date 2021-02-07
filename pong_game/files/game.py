@@ -48,23 +48,22 @@ class Game:
 
         pygame.event.pump()
 
-    def move_objects(self):
+    def move_objects(self, autonomy=True):
         self.b.move(self.screen)
-        autonomy = True
-        self.paddle1.move(self.screen, self.b, autonomy=True)
+        self.paddle1.move(self.screen, self.b, autonomy=autonomy)
         self.paddle1.collision(self.b, self. screen)
 
         if self.local or autonomy:
             self.paddle2.move(self.screen, self.b)
         self.paddle2.collision(self.b, self.screen)
 
-    def run(self):
+    def run(self, autonomy=True):
         if not self.running:
             return
 
         self.clock.tick(self.FPS)
         self.handle_events()
-        self.move_objects()
+        self.move_objects(autonomy)
         self.show()
 
     def show_background(self, width=10, height=20, gap=10):
