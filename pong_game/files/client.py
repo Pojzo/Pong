@@ -2,35 +2,7 @@ import socket
 import game as pong_game
 import pygame
 import pickle
-
-def send(msg):
-    message = pickle.dumps(msg)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    client.send(send_length)
-    client.send(message)
-
-
-def receive():
-    message_len = client.recv(HEADER).decode(FORMAT)
-    if message_len:
-
-        message_len = int(message_len)
-        #msg = pickle.load(client.recv(message_len))
-        msg = client.recv(message_len)
-
-        if msg == INITIATION_MESSAGE:
-            global initiated
-            initiated = True
-            print('[INCOMING MESSAGE] Received initiation message' )
-        elif msg == DISCONNECT_MESSAGE:
-            alive = False
-            print('[INCOMING MESSAGE] Disconnecting from server')
-        else:
-            return msg
-
-
+from datetime import datetime
 
 
 HEADER = 16
@@ -42,17 +14,63 @@ ADDR = (SERVER, PORT)
 INITIATION_MESSAGE = '!INITIATE'
 
 
+def receive(conn):
+    message_len = conn.recv(HEADER)
+    message_len = message_len.decode(FORMAT)
+
+
+    if message_len:
+        message = conn.recv(int(message_len))
+        message = pickle.loads(message)
+        return message
+
+    return None
+
+
+def initiate(conn):
+    if receive(conn) == INITIATION_MESSAGE:
+        return True
+
+    return False
+
+
+def send(conn, message):
+    pickled_message = pickle.dumps(message)
+    message_bytes = pickled_message
+    header_len = str(len(message_bytes)).encode(FORMAT)
+    header_len += b' ' * (HEADER - len(header_len))#
+    conn.send(header_len)
+    conn.send(pickled_message)
+
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 print('[CONNECTION] Connected to server')
 
-send(INITIATION_MESSAGE)
+while not initiate(client):
+    pass
 
-initiated = False
-alive = True
+print('[CONNECTION UPDATE] Received initiation message')
+send(client, INITIATION_MESSAGE)
+connected = True
+cur_time = datetime.now()
+send(client, cur_time)
+while connected:    
+    try
+        message = receive(client)
+        if not message is None:
+            if message == DISCONNECT_MESSAGE:
+                connected = False
+                break
+            else:
+                print(f'[INCOMING MESSAGE] {message}')
+                cur_time = datetime.now()
+                send(client, cur_time)
+    except ConnectionResetError:
+        connected = False
 
-msg = client.recv(1024)
-print(pickle.loads(msg))
+print('[CONNECTION UPDATE] Disconnecting from the server')
+
 
 # while not initiated:
 #     print(initiated)
@@ -68,5 +86,3 @@ print(pickle.loads(msg))
 #     game.run()
 
 # pygame.quit()
-
-
