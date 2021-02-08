@@ -26,7 +26,7 @@ def client_handle(client):
         if message == DISCONNECT_MESSAGE:
             connected = False
         else:
-            response = "got ya"
+            response = datetime.now()
             send(client, response)
             print(message)
 
