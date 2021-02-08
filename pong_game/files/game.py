@@ -12,7 +12,7 @@ class Game:
     clock = pygame.time.Clock()
     FPS = 200
 
-    def __init__(self):
+    def __init__(self, caption = 'Server'):
         pygame.init()
         pygame.font.init()
         self.paddle1 = PaddlePlayer(
@@ -22,6 +22,7 @@ class Game:
         self.b = Ball(self.WIDTH, self.HEIGHT)
 
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+        pygame.display.set_caption(caption)
         self.running = True
         self.font = pygame.font.SysFont('Arial', 30)
         self.local = False
@@ -45,8 +46,6 @@ class Game:
                     self.paddle1.KEYUP = False
                     self.paddle1.direction = 0
 
-        pygame.event.pump()
-
     def move_objects(self, autonomy=True):
         self.b.move(self.screen)
         self.paddle1.move(self.screen, self.b, autonomy=autonomy)
@@ -56,13 +55,15 @@ class Game:
             self.paddle2.move(self.screen, self.b)
         self.paddle2.collision(self.b, self.screen)
 
-    def run(self, autonomy=True):
+    def run(self, autonomy=True, move=True):
         if not self.running:
             return
 
         self.clock.tick(self.FPS)
         self.handle_events()
-        self.move_objects(autonomy)
+        if move:
+            self.move_objects(autonomy)
+            
         self.show()
 
     def show_background(self, width=10, height=20, gap=10):
@@ -103,13 +104,15 @@ class Game:
 
     def get_info(self):
         game_info = {
-            'player_y' : self.paddle1.y,
-            'enemy_y' : self.paddle2.y,
-            'ball_pos' : (self.b.x, self.b.y)
+            'player_y': self.paddle1.y,
+            'enemy_y': self.paddle2.y,
+            'ball_pos': (self.b.x, self.b.y)
         }
         return game_info
 
     def update(self, game_info):
-        self.paddle1.y = game_info['paddle_y']
-        self.paddle2.y = game_info['enemy_y']
-        self.ball.x, self.ball.y = game_info['ball_pos']
+        print(type(game_info))
+        if type(game_info) == dict:
+            self.paddle1.y = game_info['player_y']
+            self.paddle2.y = game_info['enemy_y']
+            self.b.x, self.b.y = game_info['ball_pos']

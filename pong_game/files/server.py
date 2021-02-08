@@ -2,6 +2,8 @@ import socket
 import threading
 from datetime import datetime
 from functions import send, receive, initiate
+import game as pong_game
+import pygame
 
 HEADER = 16
 PORT = 10000
@@ -24,7 +26,6 @@ def server_handle(server):
         initiated = initiate(conn)
 
     print(f'[SERVER CONNECTION UPDATE] Received initiation message from {addr}')
-
     connected = True
     while connected:
         message = receive(conn)
@@ -32,13 +33,22 @@ def server_handle(server):
             if message == DISCONNECT_MESSAGE:
                 connected = False
             else:
-                cur_time = datetime.now()
-                send(conn, cur_time)
+                global game
+                response = game.get_info()
+                send(conn, response)
+                print(message)
+                
 
 
     print(f'[SERVER CONNECTION UPDATE] {addr} disconnected')
     conn.close()
 
+
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_thread = threading.Thread(target=server_handle, args=(server,))
 server_thread.start()
+
+game = pong_game.Game()
+while game.running:
+   game.run()
