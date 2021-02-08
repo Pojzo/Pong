@@ -28,7 +28,6 @@ class Game:
 
     def handle_events(self):
         for event in pygame.event.get():
-            print(event)
             if event.type == QUIT:
                 pygame.quit()
                 self.running = 0
@@ -109,3 +108,8 @@ class Game:
             'ball_pos' : (self.b.x, self.b.y)
         }
         return game_info
+
+    def update(self, game_info):
+        self.paddle1.y = game_info['paddle_y']
+        self.paddle2.y = game_info['enemy_y']
+        self.ball.x, self.ball.y = game_info['ball_pos']
